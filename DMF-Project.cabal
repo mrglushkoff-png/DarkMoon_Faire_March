@@ -49,6 +49,7 @@ test-suite DMF-Project-test
       RenderSpec
       SolverSpec
       SessionSpec
+      DarkmoonFaireSpec
   build-depends:
       base ^>=4.18.3.0,
       DMF-Project,

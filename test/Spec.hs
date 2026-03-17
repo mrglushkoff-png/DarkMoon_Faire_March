@@ -2,6 +2,7 @@ module Main where
 
 import Test.Hspec
 
+import qualified DarkmoonFaireSpec
 import qualified GraphSpec
 import qualified RenderSpec
 import qualified SessionSpec
@@ -15,3 +16,4 @@ main = hspec $ do
   RenderSpec.spec
   SolverSpec.spec
   SessionSpec.spec
+  DarkmoonFaireSpec.spec

@@ -31,8 +31,13 @@ tuiAttrMap :: AttrMap
 tuiAttrMap =
   attrMap
     V.defAttr
-    [ (attrName "normal", V.defAttr)
-    , (attrName "claimed", fg V.green)
-    , (attrName "cursor", V.defAttr `V.withStyle` V.reverseVideo)
+    [ (attrName "claimed", fg V.green)
+    , (attrName "claimable", fg V.yellow)
+    , (attrName "reachable", fg V.cyan)
+    , (attrName "blocked", fg V.brightBlack)
+
     , (attrName "cursorClaimed", fg V.green `V.withStyle` V.reverseVideo)
+    , (attrName "cursorClaimable", fg V.yellow `V.withStyle` V.reverseVideo)
+    , (attrName "cursorReachable", fg V.cyan `V.withStyle` V.reverseVideo)
+    , (attrName "cursorBlocked", fg V.brightBlack `V.withStyle` V.reverseVideo)
     ]
