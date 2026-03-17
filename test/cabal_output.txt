@@ -1,0 +1,53 @@
+Test suite DMF-Project-test: RUNNING...
+
+Reward algebra
+  zeroReward is left identity [v]
+    +++ OK, passed 100 tests.
+  zeroReward is right identity [v]
+    +++ OK, passed 100 tests.
+  addReward is associative [v]
+    +++ OK, passed 100 tests.
+defaultValuation
+  values 5000 EXP as 100 gold [v]
+  values one minor star as 90 gold [v]
+  values one major star as 120 gold [v]
+scoreReward
+  scores gold directly [v]
+  combines reward components additively [v]
+graph topology
+  builds the expected number of nodes [v]
+  builds 8 rows with 4-3 alternation [v]
+  wires 4->3 rows correctly [v]
+  wires 3->4 rows correctly [v]
+claimability
+  initially exposes the first row [v]
+  makes B1 and B2 claimable after A2 [v]
+validation
+  accepts a valid simple traversal [v]
+  rejects an unknown node [v]
+  rejects duplicates [v]
+  rejects disconnected claims [v]
+reachability
+  includes future-reachable nodes, not just immediate ones [v]
+renderLogs
+  renders empty logs as empty output [v]
+  groups logs by phase [v]
+renderValidationFailure
+  renders validation failures clearly [v]
+renderTraversalSummary
+  renders traversal summary lines [v]
+renderSolverSummary
+  renders solver result lines [v]
+solveRemainingM
+  returns emptyResult when nothing is affordable [v]
+  picks the better available node [v]
+  picks the better branch under the same parent [v]
+  breaks equal-score ties toward lower cost [v]
+  never exceeds remaining ticket budget [v]
+runSessionM
+  returns SessionInvalid for a disconnected traversal [v]
+  returns SessionValid for a valid traversal [v]
+  marks future high-value nodes as reachable, not only immediate frontier [v]
+
+Finished in 0.0091 seconds
+32 examples, 0 failures

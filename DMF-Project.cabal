@@ -1,0 +1,61 @@
+cabal-version:      2.2
+name:               DMF-Project
+version:            0.1.0.0
+synopsis:           Solver for DMF / Blingtron-style event graphs
+license:            MIT
+license-file:       LICENSE
+author:             Max Glushkoff
+maintainer:         mr.glushkoff@gmail.com
+category:           Game
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md README.md
+
+common warnings
+    ghc-options: -Wall
+    default-language: Haskell2010
+
+library
+    import: warnings
+    hs-source-dirs: src
+    exposed-modules:
+        Types
+        App
+        Config
+        Graph
+        Render
+        Solver
+        Session
+        EventLoader
+        Event.DarkmoonFaire
+    build-depends:
+        base ^>=4.18.3.0,
+        containers,
+        mtl
+
+executable DMF-Project
+    import: warnings
+    main-is: Main.hs
+    hs-source-dirs: app
+    build-depends:
+        base ^>=4.18.3.0,
+        DMF-Project
+    default-language: Haskell2010
+
+test-suite DMF-Project-test
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Spec.hs
+  other-modules:
+      TypesSpec
+      GraphSpec
+      RenderSpec
+      SolverSpec
+      SessionSpec
+  build-depends:
+      base ^>=4.18.3.0,
+      DMF-Project,
+      hspec,
+      QuickCheck,
+      containers,
+      mtl
+  default-language: Haskell2010
