@@ -74,7 +74,7 @@ solveRemainingM graph = do
 
   let claimedNow     = claimedIds graph
       spentAlready   = claimedCost graph
-      budgetLeft     = totalTickets - spentAlready
+      budgetLeft     = totalTickets
       candidateNodes = remainingReachableNodes graph claimedNow
       indexedGraph   = indexGraph graph
       initialMask    = claimedMaskOf indexedGraph claimedNow
@@ -91,7 +91,7 @@ solveRemainingM graph = do
 
   logBlockWhenDebug Solving
     [ "solver claimed ids = " ++ show claimedNow
-    , "solver spent already = " ++ show spentAlready
+    , "historical claimed cost = " ++ show spentAlready
     , "solver budget left = " ++ show budgetLeft
     , "solver universe = " ++ show (map nodeId candidateNodes)
     , "solver memo hits = " ++ show (memoHits memoState)

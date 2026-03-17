@@ -25,6 +25,7 @@ main = do
        renderLogs loadLogs
     ++ [""]
     ++ ["Loaded event: " ++ show ev]
+    ++ ["Input mode: " ++ show (inputMode cfg)]
 
   case inputMode cfg of
     CliMode ->
@@ -45,7 +46,11 @@ runCli cfg graph = do
        [""]
     ++ renderGraph graph
     ++ [""]
-    ++ ["Enter claimed nodes as space-separated ids:"]
+    ++ renderGraphTable graph
+    ++ [""]
+    ++ [ "Enter claimed nodes as space-separated ids."
+       , "Example: A2 B2 C3"
+       ]
 
   claimed <- words <$> getLine
   runCliWithClaimed cfg graph claimed
@@ -60,7 +65,7 @@ runCliWithClaimed cfg graph claimed = do
     SessionInvalid err ->
       emit (renderValidationFailure err ++ ["", "Done."])
 
-    SessionValid accepted nextNodes reachable rewardTotal score spent remaining solution ->
+    SessionValid accepted nextNodes reachable rewardTotal score spent remaining solution leftoverTicketValue totalOutcomeScore ->
       emit $
            renderTraversalSummary
              accepted
@@ -70,5 +75,7 @@ runCliWithClaimed cfg graph claimed = do
              score
              spent
              remaining
+             leftoverTicketValue
+             totalOutcomeScore
         ++ renderSolverSummary solution
         ++ ["", "Done."]

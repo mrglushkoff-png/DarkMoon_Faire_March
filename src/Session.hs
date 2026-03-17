@@ -3,6 +3,8 @@ module Session
   , runSessionM
   ) where
 
+import Control.Monad.Reader (asks)
+
 import App
 import Graph
 import Solver
@@ -11,14 +13,16 @@ import Types
 data SessionResult
   = SessionInvalid ValidationError
   | SessionValid
-      { srAccepted   :: [NodeId]
-      , srNext       :: [NodeId]
-      , srReachable  :: [NodeId]
-      , srReward     :: Reward
-      , srScore      :: Double
-      , srSpent      :: Int
-      , srRemaining  :: Int
-      , srSolution   :: SearchResult
+      { srAccepted            :: [NodeId]
+      , srNext                :: [NodeId]
+      , srReachable           :: [NodeId]
+      , srReward              :: Reward
+      , srScore               :: Double
+      , srSpent               :: Int
+      , srRemaining           :: Int
+      , srSolution            :: SearchResult
+      , srLeftoverTicketValue :: Double
+      , srTotalOutcomeScore   :: Double
       }
   deriving (Eq, Show)
 
@@ -34,6 +38,8 @@ runSessionM graph claimed = do
       pure (SessionInvalid err)
 
     Right ok -> do
+      currentValuation <- asks valuation
+
       let graph'      = markClaimed ok graph
           rewardTotal = claimedReward graph'
           spentTotal  = claimedCost graph'
@@ -44,18 +50,27 @@ runSessionM graph claimed = do
       remaining <- remainingTicketsM graph'
       solution  <- solveRemainingM graph'
 
-      logWhenDebug Session ("accepted = " ++ show ok)
-      logWhenDebug Session ("next = " ++ show nextNodes)
-      logWhenDebug Session ("reachable = " ++ show reachable)
+      let leftoverTicketValue = scoreLeftoverTickets currentValuation remaining
+          totalOutcomeScore   = score + resultScore solution + leftoverTicketValue
+
+      logBlockWhenDebug Session
+        [ "accepted = " ++ show ok
+        , "next = " ++ show nextNodes
+        , "reachable = " ++ show reachable
+        , "leftover ticket value = " ++ show leftoverTicketValue
+        , "total outcome score = " ++ show totalOutcomeScore
+        ]
 
       pure $
         SessionValid
-          { srAccepted  = ok
-          , srNext      = nextNodes
-          , srReachable = reachable
-          , srReward    = rewardTotal
-          , srScore     = score
-          , srSpent     = spentTotal
-          , srRemaining = remaining
-          , srSolution  = solution
+          { srAccepted            = ok
+          , srNext                = nextNodes
+          , srReachable           = reachable
+          , srReward              = rewardTotal
+          , srScore               = score
+          , srSpent               = spentTotal
+          , srRemaining           = remaining
+          , srSolution            = solution
+          , srLeftoverTicketValue = leftoverTicketValue
+          , srTotalOutcomeScore   = totalOutcomeScore
           }

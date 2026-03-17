@@ -68,6 +68,8 @@ spec = do
         360.0
         2200
         1000
+        0.0
+        1359.0
       `shouldBe`
         [ ""
         , "Traversal is valid."
@@ -77,15 +79,22 @@ spec = do
         , ""
         , "Claimed reward total:"
         , show sampleReward
+        , "  = 150*G 5000*EXP 1*Troop 500*AE 1*RC"
         , ""
         , "Claimed reward score:"
         , "360.0"
         , ""
-        , "Claimed ticket cost:"
+        , "Historical claimed ticket cost:"
         , "2200"
         , ""
-        , "Remaining tickets:"
+        , "Available tickets now:"
         , "1000"
+        , ""
+        , "Leftover ticket value at event end:"
+        , "0.0"
+        , ""
+        , "Total outcome value:"
+        , "1359.0"
         ]
 
   describe "renderSolverSummary" $ do
@@ -97,6 +106,7 @@ spec = do
         , ""
         , "Best remaining reward:"
         , show sampleReward
+        , "  = 150*G 5000*EXP 1*Troop 500*AE 1*RC"
         , ""
         , "Best remaining ticket cost:"
         , "4200"

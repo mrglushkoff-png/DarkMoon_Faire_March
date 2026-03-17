@@ -58,20 +58,22 @@ spec = do
     it "returns SessionValid for a valid traversal" $ do
       let (result, _) = runApp testConfig (runSessionM sessionGraph ["A2","B2"])
       case result of
-        SessionValid accepted nextNodes reachable rewardTotal _score spent remaining _solution -> do
+        SessionValid accepted nextNodes reachable rewardTotal _score spent remaining _solution leftoverTicketValue totalOutcomeScore -> do
           accepted `shouldBe` ["A2","B2"]
           nextNodes `shouldSatisfy` elem "A1"
           reachable `shouldSatisfy` elem "A1"
           rewardTotal `shouldBe` addReward (rGold 0) (rGold 30)
           spent `shouldBe` 250
-          remaining `shouldBe` 750
+          remaining `shouldBe` 1000
+          leftoverTicketValue `shouldBe` 0
+          totalOutcomeScore `shouldSatisfy` (>= 30)
         _ ->
           expectationFailure ("Expected SessionValid, got " ++ showTag result)
 
     it "marks future high-value nodes as reachable, not only immediate frontier" $ do
       let (result, _) = runApp testConfig (runSessionM sessionGraph ["A2"])
       case result of
-        SessionValid _ _ reachable _ _ _ _ _ -> do
+        SessionValid _ _ reachable _ _ _ _ _ _ _ -> do
           reachable `shouldSatisfy` elem "B1"
           reachable `shouldSatisfy` elem "B2"
         _ ->
@@ -85,18 +87,18 @@ spec = do
         in case result of
              SessionInvalid _ ->
                True
-             SessionValid accepted _ _ _ _ _ _ _ ->
+             SessionValid accepted _ _ _ _ _ _ _ _ _ ->
                all (`elem` map nodeId sessionGraph) accepted
 
-    it "spent plus remaining equals configured tickets on valid sessions" $
+    it "remaining equals configured tickets on valid sessions" $
       property $ \(ArbBudget budget) (ArbSessionIds xs) ->
         let cfg = mkConfig budget
             (result, _) = runApp cfg (runSessionM sessionGraph xs)
         in case result of
              SessionInvalid _ ->
                True
-             SessionValid _ _ _ _ _ spent remaining _ ->
-               spent + remaining == budget
+             SessionValid _ _ _ _ _ _ remaining _ _ _ ->
+               remaining == budget
 
     it "next nodes never overlap accepted nodes" $
       property $ \(ArbBudget budget) (ArbSessionIds xs) ->
@@ -105,7 +107,7 @@ spec = do
         in case result of
              SessionInvalid _ ->
                True
-             SessionValid accepted nextNodes _ _ _ _ _ _ ->
+             SessionValid accepted nextNodes _ _ _ _ _ _ _ _ ->
                S.null (S.fromList accepted `S.intersection` S.fromList nextNodes)
 
     it "accepted ids in valid sessions are claimable in sequence" $
@@ -115,7 +117,7 @@ spec = do
         in case result of
              SessionInvalid _ ->
                True
-             SessionValid accepted _ _ _ _ _ _ _ ->
+             SessionValid accepted _ _ _ _ _ _ _ _ _ ->
                validSequence sessionGraph accepted
 
 showTag :: SessionResult -> String

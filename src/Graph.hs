@@ -141,17 +141,15 @@ claimedCost = sum . map cost . claimedNodes
 
 remainingTicketsM :: Graph -> App Int
 remainingTicketsM graph = do
-  let spentTickets = claimedCost graph
-  totalTickets <- asks tickets
-  let remaining = totalTickets - spentTickets
+  let historicalClaimedCost = claimedCost graph
+  availableTickets <- asks tickets
 
   logBlockWhenDebug Ticketing
-    [ "claimed cost = " ++ show spentTickets
-    , "available tickets = " ++ show totalTickets
-    , "remaining tickets = " ++ show remaining
+    [ "historical claimed cost = " ++ show historicalClaimedCost
+    , "available tickets now = " ++ show availableTickets
     ]
 
-  pure remaining
+  pure availableTickets
 
 lookupNode :: NodeId -> Graph -> Maybe Node
 lookupNode nid = find ((== nid) . nodeId)

@@ -5,6 +5,7 @@ module TUI.Draw
 import Brick
 import Brick.Widgets.Border
 import Brick.Widgets.Center
+import qualified Data.Text as T
 
 import Render
 import Session
@@ -16,7 +17,11 @@ drawUi st =
   [ center $
       hBox
         [ borderWithLabel (str "Graph") (padAll 1 (drawGraph st))
-        , borderWithLabel (str "Info")  (padAll 1 (hLimit 60 (drawInfo st)))
+        , padLeft (Pad 1) $
+            borderWithLabel (str "Info") $
+              hLimitPercent 60 $
+                viewport InfoViewport Vertical $
+                  padAll 1 (drawInfo st)
         ]
   ]
 
@@ -54,18 +59,32 @@ nodeAttr here claimed nextNow reach =
 
 drawInfo :: TuiState -> Widget Name
 drawInfo st =
-  vBox (map (padBottom (Pad 0) . str) infoLines)
+  vBox (map renderLine infoLines)
   where
+    renderLine :: String -> Widget Name
+    renderLine = padBottom (Pad 0) . txtWrap . T.pack
+
     infoLines =
-         [ "Cursor: " ++ tuiCursor st
-         , "Mode: " ++ show (tuiMode st)
+         [ "Controls:"
+         , "  Arrows  = move cursor"
+         , "  Space   = toggle claimed"
+         , "  Enter   = toggle claimed"
+         , "  s       = solve"
+         , "  q       = quit"
+         , "  PgUp/PgDn = scroll info"
+         , "  j / k   = scroll info"
          , ""
+         , "Cursor: " ++ tuiCursor st
+         , "Mode: " ++ show (tuiMode st)
+         ]
+      ++ drawCursorDetails st
+      ++ [ ""
          , "Legend:"
          , "  [*] claimed"
          , "  [ ] unclaimed"
          , "  green   = claimed"
          , "  yellow  = claimable now"
-         , "  blue    = reachable later"
+         , "  cyan    = reachable later"
          , "  dim     = blocked"
          , ""
          , "Claimed: " ++ unwords (tuiClaimed st)
@@ -81,6 +100,32 @@ drawInfo st =
       ++ drawSessionLines st
       ++ drawLogLines st
 
+drawCursorDetails :: TuiState -> [String]
+drawCursorDetails st =
+  case lookupCursorNode st of
+    Nothing ->
+      []
+
+    Just node ->
+      [ ""
+      , "Hovered node:"
+      , "  Node: " ++ nodeId node
+      , "  Cost: " ++ show (cost node)
+      , "  Reward: " ++ renderRewardCompact (reward node)
+      , "  Parents: " ++ renderParents (parents node)
+      ]
+
+lookupCursorNode :: TuiState -> Maybe Node
+lookupCursorNode st =
+  go (tuiGraph st)
+  where
+    target = tuiCursor st
+
+    go [] = Nothing
+    go (n:ns)
+      | nodeId n == target = Just n
+      | otherwise          = go ns
+
 drawSessionLines :: TuiState -> [String]
 drawSessionLines st =
   case tuiSession st of
@@ -90,7 +135,7 @@ drawSessionLines st =
     Just (SessionInvalid err) ->
       renderValidationFailure err
 
-    Just (SessionValid accepted nextNodes reachable rewardTotal score spent remaining solution) ->
+    Just (SessionValid accepted nextNodes reachable rewardTotal score spent remaining solution leftoverTicketValue totalOutcomeScore) ->
       renderTraversalSummary
         accepted
         nextNodes
@@ -99,6 +144,8 @@ drawSessionLines st =
         score
         spent
         remaining
+        leftoverTicketValue
+        totalOutcomeScore
       ++ renderSolverSummary solution
 
 drawLogLines :: TuiState -> [String]

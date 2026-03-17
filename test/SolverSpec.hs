@@ -17,6 +17,7 @@ tinyValuation =
     , valueMajorStar = 120
     , valueArclightEnergy = 0
     , valueRareCore = 0
+    , valueLeftoverTicket = 0
     }
 
 mkConfig :: Int -> Config
@@ -80,11 +81,12 @@ spec = do
       resultPath result `shouldBe` ["A2"]
       resultScore result `shouldBe` 70
 
-    it "picks the better branch under the same parent" $ do
+    it "picks the best affordable combination under the same parent" $ do
       let cfg = mkConfig 200
           (result, _) = runApp cfg (solveRemainingM branchGraph)
-      resultPath result `shouldBe` ["B2"]
-      resultScore result `shouldBe` 80
+      resultPath result `shouldBe` ["B2","B1"]
+      resultCost result `shouldBe` 200
+      resultScore result `shouldBe` 110
 
     it "breaks equal-score ties toward lower cost" $ do
       let cfg = mkConfig 200

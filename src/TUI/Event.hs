@@ -45,6 +45,18 @@ appEvent ev =
       st <- get
       put (moveCursor nextRowNodeId st)
 
+    VtyEvent (V.EvKey V.KPageUp []) ->
+      vScrollBy (viewportScroll InfoViewport) (-10)
+
+    VtyEvent (V.EvKey V.KPageDown []) ->
+      vScrollBy (viewportScroll InfoViewport) 10
+
+    VtyEvent (V.EvKey (V.KChar 'k') []) ->
+      vScrollBy (viewportScroll InfoViewport) (-3)
+
+    VtyEvent (V.EvKey (V.KChar 'j') []) ->
+      vScrollBy (viewportScroll InfoViewport) 3
+
     _ ->
       pure ()
 

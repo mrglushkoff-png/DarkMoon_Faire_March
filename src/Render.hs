@@ -1,9 +1,12 @@
 module Render
   ( renderGraph
+  , renderGraphTable
   , renderLogs
   , renderValidationFailure
   , renderTraversalSummary
   , renderSolverSummary
+  , renderRewardCompact
+  , renderParents
   ) where
 
 import Data.List (groupBy, sortOn)
@@ -15,6 +18,16 @@ import Types
 renderGraph :: Graph -> [String]
 renderGraph graph =
   "Graph:" : map renderRow (graphRows graph)
+
+renderGraphTable :: Graph -> [String]
+renderGraphTable graph =
+  "Node table:" :
+  [ nodeId node
+      ++ " | cost=" ++ show (cost node)
+      ++ " | reward=" ++ renderRewardCompact (reward node)
+      ++ " | parents=" ++ renderParents (parents node)
+  | node <- graph
+  ]
 
 renderLogs :: [LogEntry] -> [String]
 renderLogs entries =
@@ -50,8 +63,10 @@ renderTraversalSummary
   -> Double
   -> Int
   -> Int
+  -> Double
+  -> Double
   -> [String]
-renderTraversalSummary accepted next reachable rewardTotal score spent remaining =
+renderTraversalSummary accepted next reachable rewardTotal score spent remaining leftoverTicketValue totalOutcomeScore =
   [ ""
   , "Traversal is valid."
   , "Accepted claimed nodes: " ++ unwords accepted
@@ -60,15 +75,22 @@ renderTraversalSummary accepted next reachable rewardTotal score spent remaining
   , ""
   , "Claimed reward total:"
   , show rewardTotal
+  , "  = " ++ renderRewardCompact rewardTotal
   , ""
   , "Claimed reward score:"
   , show score
   , ""
-  , "Claimed ticket cost:"
+  , "Historical claimed ticket cost:"
   , show spent
   , ""
-  , "Remaining tickets:"
+  , "Available tickets now:"
   , show remaining
+  , ""
+  , "Leftover ticket value at event end:"
+  , show leftoverTicketValue
+  , ""
+  , "Total outcome value:"
+  , show totalOutcomeScore
   ]
 
 renderSolverSummary :: SearchResult -> [String]
@@ -79,6 +101,7 @@ renderSolverSummary result =
   , ""
   , "Best remaining reward:"
   , show (resultReward result)
+  , "  = " ++ renderRewardCompact (resultReward result)
   , ""
   , "Best remaining ticket cost:"
   , show (resultCost result)
@@ -89,3 +112,21 @@ renderSolverSummary result =
 
 renderRow :: [Node] -> String
 renderRow = unwords . map nodeId
+
+renderRewardCompact :: Reward -> String
+renderRewardCompact r =
+  unwords (filter (not . null)
+    [ part "G"      (rewardGold r)
+    , part "EXP"    (rewardExp r)
+    , part "Troop"  (rewardMinorStars r)
+    , part "Leader" (rewardMajorStars r)
+    , part "AE"     (rewardArclightEnergy r)
+    , part "RC"     (rewardRareCores r)
+    ])
+  where
+    part _ 0 = ""
+    part s n = show n ++ "*" ++ s
+
+renderParents :: [NodeId] -> String
+renderParents [] = "-"
+renderParents xs = unwords xs

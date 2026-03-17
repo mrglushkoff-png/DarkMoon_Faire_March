@@ -46,6 +46,15 @@ spec = do
     it "values one major star as 120 gold" $
       scoreReward defaultValuation zeroReward { rewardMajorStars = 1 } `shouldBe` 120
 
+    it "values 500 AE as 100 gold" $
+      scoreReward defaultValuation zeroReward { rewardArclightEnergy = 500 } `shouldBe` 100
+
+    it "values one Rare Core as 250 gold" $
+      scoreReward defaultValuation zeroReward { rewardRareCores = 1 } `shouldBe` 250
+
+    it "values leftover tickets as zero by default" $
+      scoreLeftoverTickets defaultValuation 500 `shouldBe` 0
+
   describe "scoreReward" $ do
     it "scores gold directly" $
       scoreReward defaultValuation zeroReward { rewardGold = 250 } `shouldBe` 250
@@ -57,8 +66,8 @@ spec = do
               , rewardExp = 5000
               , rewardMinorStars = 1
               , rewardMajorStars = 1
-              , rewardArclightEnergy = 0
-              , rewardRareCores = 0
+              , rewardArclightEnergy = 500
+              , rewardRareCores = 1
               }
 
-      scoreReward defaultValuation sampleReward `shouldBe` 360
+      scoreReward defaultValuation sampleReward `shouldBe` 710

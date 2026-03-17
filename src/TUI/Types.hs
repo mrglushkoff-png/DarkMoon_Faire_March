@@ -11,6 +11,7 @@ import Types
 
 data Name
   = GraphViewport
+  | InfoViewport
   deriving (Eq, Ord, Show)
 
 data Mode

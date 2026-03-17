@@ -7,6 +7,7 @@ module Types
   , Valuation(..)
   , defaultValuation
   , scoreReward
+  , scoreLeftoverTickets
   , EventName(..)
   , InputMode(..)
   , Config(..)
@@ -59,6 +60,7 @@ data Valuation = Valuation
   , valueMajorStar      :: !Double
   , valueArclightEnergy :: !Double
   , valueRareCore       :: !Double
+  , valueLeftoverTicket :: !Double
   } deriving (Eq, Show)
 
 defaultValuation :: Valuation
@@ -67,8 +69,9 @@ defaultValuation =
     { valueExp            = 100 / 5000
     , valueMinorStar      = 90
     , valueMajorStar      = 120
-    , valueArclightEnergy = 0
-    , valueRareCore       = 0
+    , valueArclightEnergy = 100 / 500
+    , valueRareCore       = 250
+    , valueLeftoverTicket = 0
     }
 
 scoreReward :: Valuation -> Reward -> Double
@@ -79,6 +82,10 @@ scoreReward v r =
   + fromIntegral (rewardMajorStars r)     * valueMajorStar v
   + fromIntegral (rewardArclightEnergy r) * valueArclightEnergy v
   + fromIntegral (rewardRareCores r)      * valueRareCore v
+
+scoreLeftoverTickets :: Valuation -> Int -> Double
+scoreLeftoverTickets v ticketsLeft =
+  fromIntegral ticketsLeft * valueLeftoverTicket v
 
 data EventName
   = DarkmoonFaire
