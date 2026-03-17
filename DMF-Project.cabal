@@ -58,3 +58,12 @@ test-suite DMF-Project-test
       containers,
       mtl
   default-language: Haskell2010
+
+executable dmf-project-app
+  hs-source-dirs: app
+  main-is: Main.hs
+  build-depends:
+      base ^>=4.18.3.0
+    , DMF-Project
+  ghc-options: -threaded
+  default-language: Haskell2010

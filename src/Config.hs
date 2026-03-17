@@ -2,57 +2,87 @@ module Config
   ( getConfig
   ) where
 
+import Data.Char (toLower)
+import Data.List (dropWhileEnd)
+import System.IO (hFlush, stdout)
+import Text.Read (readMaybe)
+
 import EventLoader
 import Types
 
-readInt :: String -> IO Int
-readInt prompt = putStr prompt >> readLn
+prompt :: String -> IO String
+prompt message = do
+  putStr message
+  hFlush stdout
+  trim <$> getLine
 
-readDouble :: String -> IO Double
-readDouble prompt = putStr prompt >> readLn
+trim :: String -> String
+trim =
+  dropWhileEnd (== ' ') . dropWhile (== ' ')
 
-yesInput :: String -> Bool
-yesInput s =
-  s `elem` ["y", "Y", "yes", "YES", "Yes"]
+lower :: String -> String
+lower = map toLower
+
+promptUntil :: String -> (String -> Maybe a) -> IO a
+promptUntil message parse = do
+  input <- prompt message
+  case parse input of
+    Just value ->
+      pure value
+    Nothing -> do
+      putStrLn "Invalid input, please try again."
+      promptUntil message parse
+
+parseInt :: String -> Maybe Int
+parseInt = readMaybe
+
+parseDouble :: String -> Maybe Double
+parseDouble = readMaybe
+
+parseYesNo :: String -> Maybe Bool
+parseYesNo input =
+  case lower input of
+    "y"   -> Just True
+    "yes" -> Just True
+    "n"   -> Just False
+    "no"  -> Just False
+    _     -> Nothing
+
+parseInputMode :: String -> Maybe InputMode
+parseInputMode input =
+  case lower input of
+    "1"    -> Just CliMode
+    "cli"  -> Just CliMode
+    "2"    -> Just TuiMode
+    "tui"  -> Just TuiMode
+    _      -> Nothing
 
 getEventName :: IO EventName
 getEventName = do
   putStrLn "Select event:"
   putStrLn "  1) DarkmoonFaire"
-  putStr "Choice: "
-  choice <- getLine
-  case parseEventName choice of
-    Just ev -> pure ev
-    Nothing -> do
-      putStrLn "Invalid event selection, defaulting to DarkmoonFaire."
-      pure DarkmoonFaire
+  promptUntil "Choice: " parseEventName
 
 getInputMode :: IO InputMode
 getInputMode = do
   putStrLn "\nSelect input mode:"
   putStrLn "  1) CLI"
   putStrLn "  2) TUI"
-  putStr "Choice: "
-  choice <- getLine
-  pure $
-    case choice of
-      "2"   -> TuiMode
-      "tui" -> TuiMode
-      _     -> CliMode
+  promptUntil "Choice: " parseInputMode
 
 getValuation :: IO Valuation
 getValuation = do
-  putStrLn "\nUse default valuation? (y/n)"
-  useDefault <- getLine
+  useDefault <- promptUntil "\nUse default valuation? (y/n): " parseYesNo
 
-  if yesInput useDefault
+  if useDefault
     then pure defaultValuation
     else do
-      expV   <- readDouble "Gold value per 1 EXP: "
-      minorV <- readDouble "Minor star value: "
-      majorV <- readDouble "Major star value: "
-      aeV    <- readDouble "Gold value per 1 Arclight Energy: "
-      rareV  <- readDouble "Gold value per 1 Rare core: "
+      expV   <- promptUntil "Gold value per 1 EXP: " parseDouble
+      minorV <- promptUntil "Minor star value: " parseDouble
+      majorV <- promptUntil "Major star value: " parseDouble
+      aeV    <- promptUntil "Gold value per 1 Arclight Energy: " parseDouble
+      rareV  <- promptUntil "Gold value per 1 Rare core: " parseDouble
+
       pure $
         Valuation
           { valueExp            = expV
@@ -64,13 +94,11 @@ getValuation = do
 
 getConfig :: IO Config
 getConfig = do
-  ev  <- getEventName
+  ev   <- getEventName
   mode <- getInputMode
-  t   <- readInt "Available tickets: "
-  v   <- getValuation
-
-  putStrLn "\nEnable debug logs? (y/n)"
-  dbg <- yesInput <$> getLine
+  t    <- promptUntil "Available tickets: " parseInt
+  v    <- getValuation
+  dbg  <- promptUntil "\nEnable debug logs? (y/n): " parseYesNo
 
   pure $
     Config
