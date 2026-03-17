@@ -23,6 +23,7 @@ mkConfig :: Int -> Config
 mkConfig ticketCount =
   Config
     { eventName = DarkmoonFaire
+    , inputMode = CliMode
     , tickets = ticketCount
     , valuation = tinyValuation
     , debugEnabled = False

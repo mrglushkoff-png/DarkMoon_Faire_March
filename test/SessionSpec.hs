@@ -13,6 +13,7 @@ testConfig :: Config
 testConfig =
   Config
     { eventName = DarkmoonFaire
+    , inputMode = CliMode
     , tickets = 1000
     , valuation = defaultValuation
     , debugEnabled = False
