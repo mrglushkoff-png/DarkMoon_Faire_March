@@ -20,6 +20,16 @@
   (major1) == 4 && (major2) <  18 || \
   (major1) == 4 && (major2) == 18 && (minor) <= 3)
 #endif /* MIN_VERSION_base */
+/* package brick-2.10 */
+#ifndef VERSION_brick
+#define VERSION_brick "2.10"
+#endif /* VERSION_brick */
+#ifndef MIN_VERSION_brick
+#define MIN_VERSION_brick(major1,major2,minor) (\
+  (major1) <  2 || \
+  (major1) == 2 && (major2) <  10 || \
+  (major1) == 2 && (major2) == 10 && (minor) <= 0)
+#endif /* MIN_VERSION_brick */
 /* package containers-0.6.7 */
 #ifndef VERSION_containers
 #define VERSION_containers "0.6.7"
@@ -40,6 +50,26 @@
   (major1) == 2 && (major2) <  3 || \
   (major1) == 2 && (major2) == 3 && (minor) <= 1)
 #endif /* MIN_VERSION_mtl */
+/* package vty-6.5 */
+#ifndef VERSION_vty
+#define VERSION_vty "6.5"
+#endif /* VERSION_vty */
+#ifndef MIN_VERSION_vty
+#define MIN_VERSION_vty(major1,major2,minor) (\
+  (major1) <  6 || \
+  (major1) == 6 && (major2) <  5 || \
+  (major1) == 6 && (major2) == 5 && (minor) <= 0)
+#endif /* MIN_VERSION_vty */
+/* package vty-crossplatform-0.5.0.0 */
+#ifndef VERSION_vty_crossplatform
+#define VERSION_vty_crossplatform "0.5.0.0"
+#endif /* VERSION_vty_crossplatform */
+#ifndef MIN_VERSION_vty_crossplatform
+#define MIN_VERSION_vty_crossplatform(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  5 || \
+  (major1) == 0 && (major2) == 5 && (minor) <= 0)
+#endif /* MIN_VERSION_vty_crossplatform */
 
 /* tool gcc-14.0.6 */
 #ifndef TOOL_VERSION_gcc

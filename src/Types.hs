@@ -8,6 +8,7 @@ module Types
   , defaultValuation
   , scoreReward
   , EventName(..)
+  , InputMode(..)
   , Config(..)
   , NodePayload(..)
   , defaultPayload
@@ -83,8 +84,14 @@ data EventName
   = DarkmoonFaire
   deriving (Eq, Show, Read, Enum, Bounded)
 
+data InputMode
+  = CliMode
+  | TuiMode
+  deriving (Eq, Show, Read, Enum, Bounded)
+
 data Config = Config
   { eventName    :: !EventName
+  , inputMode    :: !InputMode
   , tickets      :: !Int
   , valuation    :: !Valuation
   , debugEnabled :: !Bool

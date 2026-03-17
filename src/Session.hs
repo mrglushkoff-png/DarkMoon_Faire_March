@@ -20,6 +20,7 @@ data SessionResult
       , srRemaining  :: Int
       , srSolution   :: SearchResult
       }
+  deriving (Eq, Show)
 
 runSessionM :: Graph -> [NodeId] -> App SessionResult
 runSessionM graph claimed = do

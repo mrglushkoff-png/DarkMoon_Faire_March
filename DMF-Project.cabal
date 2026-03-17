@@ -15,31 +15,29 @@ common warnings
     default-language: Haskell2010
 
 library
-    import: warnings
-    hs-source-dirs: src
-    exposed-modules:
-        Types
-        App
-        Config
-        Graph
-        Render
-        Solver
-        Session
-        EventLoader
-        Event.DarkmoonFaire
-    build-depends:
-        base ^>=4.18.3.0,
-        containers,
-        mtl
-
-executable DMF-Project
-    import: warnings
-    main-is: Main.hs
-    hs-source-dirs: app
-    build-depends:
-        base ^>=4.18.3.0,
-        DMF-Project
-    default-language: Haskell2010
+  hs-source-dirs: src
+  exposed-modules:
+      Types
+      App
+      Config
+      Graph
+      Render
+      Solver
+      Session
+      EventLoader
+      Event.DarkmoonFaire
+      TUI.Types
+      TUI.Draw
+      TUI.Event
+      TUI.App
+  build-depends:
+      base ^>=4.18.3.0
+    , brick
+    , vty
+    , vty-crossplatform
+    , containers
+    , mtl
+  default-language: Haskell2010
 
 test-suite DMF-Project-test
   type: exitcode-stdio-1.0

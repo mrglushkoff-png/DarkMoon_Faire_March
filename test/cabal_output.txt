@@ -29,6 +29,17 @@ validation
   rejects disconnected claims [v]
 reachability
   includes future-reachable nodes, not just immediate ones [v]
+QuickCheck graph invariants
+  markClaimed preserves node count [v]
+    +++ OK, passed 100 tests.
+  markClaimed preserves node ids and order [v]
+    +++ OK, passed 100 tests.
+  claimableNow never returns already-accepted ids [v]
+    +++ OK, passed 100 tests.
+  reachableIds always contains claimableNow [v]
+    +++ OK, passed 100 tests.
+  successful validation only returns known node ids [v]
+    +++ OK, passed 100 tests.
 renderLogs
   renders empty logs as empty output [v]
   groups logs by phase [v]
@@ -44,10 +55,26 @@ solveRemainingM
   picks the better branch under the same parent [v]
   breaks equal-score ties toward lower cost [v]
   never exceeds remaining ticket budget [v]
+QuickCheck solver invariants
+  result cost never exceeds configured ticket budget [v]
+    +++ OK, passed 100 tests.
+  result path contains no duplicate node ids [v]
+    +++ OK, passed 100 tests.
+  result path is claimable in sequence [v]
+    +++ OK, passed 100 tests.
 runSessionM
   returns SessionInvalid for a disconnected traversal [v]
   returns SessionValid for a valid traversal [v]
   marks future high-value nodes as reachable, not only immediate frontier [v]
+QuickCheck session invariants
+  valid sessions only return known accepted ids [v]
+    +++ OK, passed 100 tests.
+  spent plus remaining equals configured tickets on valid sessions [v]
+    +++ OK, passed 100 tests.
+  next nodes never overlap accepted nodes [v]
+    +++ OK, passed 100 tests.
+  accepted ids in valid sessions are claimable in sequence [v]
+    +++ OK, passed 100 tests.
 
-Finished in 0.0091 seconds
-32 examples, 0 failures
+Finished in 0.0203 seconds
+44 examples, 0 failures

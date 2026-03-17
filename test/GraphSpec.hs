@@ -1,6 +1,8 @@
 module GraphSpec (spec) where
 
 import Test.Hspec
+import Test.QuickCheck
+import qualified Data.Set as S
 
 import App
 import Graph
@@ -18,6 +20,14 @@ testConfig =
 testGraph :: Graph
 testGraph =
   fst (runApp testConfig (buildGraphM (replicate (sum rowSizes) defaultPayload)))
+
+newtype ArbNodeIds = ArbNodeIds [NodeId]
+  deriving Show
+
+instance Arbitrary ArbNodeIds where
+  arbitrary = do
+    picks <- sublistOf (nodeIds testGraph)
+    pure (ArbNodeIds picks)
 
 spec :: Spec
 spec = do
@@ -69,3 +79,32 @@ spec = do
       reachable `shouldSatisfy` elem "B2"
       reachable `shouldSatisfy` elem "C2"
       reachable `shouldSatisfy` elem "D2"
+
+  describe "QuickCheck graph invariants" $ do
+    it "markClaimed preserves node count" $
+      property $ \(ArbNodeIds xs) ->
+        length (markClaimed xs testGraph) == length testGraph
+
+    it "markClaimed preserves node ids and order" $
+      property $ \(ArbNodeIds xs) ->
+        map nodeId (markClaimed xs testGraph) == map nodeId testGraph
+
+    it "claimableNow never returns already-accepted ids" $
+      property $ \(ArbNodeIds xs) ->
+        let acceptedSet  = S.fromList xs
+            claimableSet = S.fromList (claimableNow testGraph xs)
+        in S.null (acceptedSet `S.intersection` claimableSet)
+
+    it "reachableIds always contains claimableNow" $
+      property $ \(ArbNodeIds xs) ->
+        let claimableSet = S.fromList (claimableNow testGraph xs)
+            reachableSet = S.fromList (reachableIds testGraph xs)
+        in claimableSet `S.isSubsetOf` reachableSet
+
+    it "successful validation only returns known node ids" $
+      property $ \(ArbNodeIds xs) ->
+        case fst (runApp testConfig (validateClaimedM testGraph xs)) of
+          Left _ ->
+            True
+          Right accepted ->
+            all (`elem` nodeIds testGraph) accepted

@@ -27,6 +27,19 @@ getEventName = do
       putStrLn "Invalid event selection, defaulting to DarkmoonFaire."
       pure DarkmoonFaire
 
+getInputMode :: IO InputMode
+getInputMode = do
+  putStrLn "\nSelect input mode:"
+  putStrLn "  1) CLI"
+  putStrLn "  2) TUI"
+  putStr "Choice: "
+  choice <- getLine
+  pure $
+    case choice of
+      "2"   -> TuiMode
+      "tui" -> TuiMode
+      _     -> CliMode
+
 getValuation :: IO Valuation
 getValuation = do
   putStrLn "\nUse default valuation? (y/n)"
@@ -51,9 +64,10 @@ getValuation = do
 
 getConfig :: IO Config
 getConfig = do
-  ev <- getEventName
-  t  <- readInt "Available tickets: "
-  v  <- getValuation
+  ev  <- getEventName
+  mode <- getInputMode
+  t   <- readInt "Available tickets: "
+  v   <- getValuation
 
   putStrLn "\nEnable debug logs? (y/n)"
   dbg <- yesInput <$> getLine
@@ -61,6 +75,7 @@ getConfig = do
   pure $
     Config
       { eventName    = ev
+      , inputMode    = mode
       , tickets      = t
       , valuation    = v
       , debugEnabled = dbg

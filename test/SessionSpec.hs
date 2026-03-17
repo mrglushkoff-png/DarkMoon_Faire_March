@@ -1,6 +1,8 @@
 module SessionSpec (spec) where
 
 import Test.Hspec
+import Test.QuickCheck
+import qualified Data.Set as S
 
 import App
 import Graph
@@ -16,6 +18,10 @@ testConfig =
     , debugEnabled = False
     }
 
+mkConfig :: Int -> Config
+mkConfig ticketCount =
+  testConfig { tickets = ticketCount }
+
 rGold :: Int -> Reward
 rGold n = zeroReward { rewardGold = n }
 
@@ -26,6 +32,18 @@ sessionGraph =
   , Node "B1" 2 200 (rGold 80) ["A1","A2"] False
   , Node "B2" 2 150 (rGold 30) ["A2"] False
   ]
+
+newtype ArbBudget = ArbBudget Int
+  deriving Show
+
+instance Arbitrary ArbBudget where
+  arbitrary = ArbBudget <$> chooseInt (0, 2000)
+
+newtype ArbSessionIds = ArbSessionIds [NodeId]
+  deriving Show
+
+instance Arbitrary ArbSessionIds where
+  arbitrary = ArbSessionIds <$> sublistOf (map nodeId sessionGraph)
 
 spec :: Spec
 spec = do
@@ -58,6 +76,61 @@ spec = do
         _ ->
           expectationFailure ("Expected SessionValid, got " ++ showTag result)
 
+  describe "QuickCheck session invariants" $ do
+    it "valid sessions only return known accepted ids" $
+      property $ \(ArbBudget budget) (ArbSessionIds xs) ->
+        let cfg = mkConfig budget
+            (result, _) = runApp cfg (runSessionM sessionGraph xs)
+        in case result of
+             SessionInvalid _ ->
+               True
+             SessionValid accepted _ _ _ _ _ _ _ ->
+               all (`elem` map nodeId sessionGraph) accepted
+
+    it "spent plus remaining equals configured tickets on valid sessions" $
+      property $ \(ArbBudget budget) (ArbSessionIds xs) ->
+        let cfg = mkConfig budget
+            (result, _) = runApp cfg (runSessionM sessionGraph xs)
+        in case result of
+             SessionInvalid _ ->
+               True
+             SessionValid _ _ _ _ _ spent remaining _ ->
+               spent + remaining == budget
+
+    it "next nodes never overlap accepted nodes" $
+      property $ \(ArbBudget budget) (ArbSessionIds xs) ->
+        let cfg = mkConfig budget
+            (result, _) = runApp cfg (runSessionM sessionGraph xs)
+        in case result of
+             SessionInvalid _ ->
+               True
+             SessionValid accepted nextNodes _ _ _ _ _ _ ->
+               S.null (S.fromList accepted `S.intersection` S.fromList nextNodes)
+
+    it "accepted ids in valid sessions are claimable in sequence" $
+      property $ \(ArbBudget budget) (ArbSessionIds xs) ->
+        let cfg = mkConfig budget
+            (result, _) = runApp cfg (runSessionM sessionGraph xs)
+        in case result of
+             SessionInvalid _ ->
+               True
+             SessionValid accepted _ _ _ _ _ _ _ ->
+               validSequence sessionGraph accepted
+
 showTag :: SessionResult -> String
 showTag (SessionInvalid e) = "SessionInvalid " ++ show e
 showTag SessionValid{}     = "SessionValid"
+
+validSequence :: Graph -> [NodeId] -> Bool
+validSequence graph =
+  go S.empty
+  where
+    go _ [] = True
+    go acceptedSet (nid:nids) =
+      case lookupNode nid graph of
+        Nothing ->
+          False
+        Just node ->
+             nodeId node `S.notMember` acceptedSet
+          && claimable acceptedSet node
+          && go (S.insert nid acceptedSet) nids

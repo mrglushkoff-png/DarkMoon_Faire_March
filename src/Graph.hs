@@ -15,6 +15,7 @@ module Graph
   , claimableNow
   , reachableIds
   , remainingReachableNodes
+  , validateClaimed
   , validateClaimedM
   ) where
 
@@ -229,49 +230,40 @@ remainingReachableNodes graph acceptedIds =
      , nodeId node `S.member` reachableSet
      ]
 
-validateClaimedM :: Graph -> [NodeId] -> App (Either ValidationError [NodeId])
-validateClaimedM graph inputIds = do
-  let nodesById =
-        M.fromList [ (nodeId node, node) | node <- graph ]
-
-      wantedSet =
-        S.fromList inputIds
-
-      acceptedSet =
-        saturate nodesById wantedSet S.empty
-
-      acceptedInGraphOrder =
-        [ nodeId node
-        | node <- graph
-        , nodeId node `S.member` acceptedSet
-        ]
-
-      duplicateId =
-        firstDuplicate S.empty inputIds
-
-      unknownId =
-        find (`M.notMember` nodesById) inputIds
-
-      disconnectedId =
-        find (`S.notMember` acceptedSet) inputIds
-
-      result
-        | Just dup <- duplicateId    = Left (DuplicateNodeId dup)
-        | Just bad <- unknownId      = Left (UnknownNodeId bad)
-        | Just bad <- disconnectedId = Left (DisconnectedClaim bad)
-        | otherwise                  = Right acceptedInGraphOrder
-
-  logBlockWhenDebug Validation
-    [ "validation input = " ++ show inputIds
-    , "known node ids = " ++ show (nodeIds graph)
-    , "claimable from empty = " ++ show (claimableNow graph [])
-    , "accepted in graph order = " ++ show acceptedInGraphOrder
-    , "claimable after accepted = " ++ show (claimableNow graph acceptedInGraphOrder)
-    , "reachable after accepted = " ++ show (reachableIds graph acceptedInGraphOrder)
-    ]
-
-  pure result
+validateClaimed :: Graph -> [NodeId] -> Either ValidationError [NodeId]
+validateClaimed graph inputIds =
+  result
   where
+    nodesById =
+      M.fromList [ (nodeId node, node) | node <- graph ]
+
+    wantedSet =
+      S.fromList inputIds
+
+    acceptedSet =
+      saturate nodesById wantedSet S.empty
+
+    acceptedInGraphOrder =
+      [ nodeId node
+      | node <- graph
+      , nodeId node `S.member` acceptedSet
+      ]
+
+    duplicateId =
+      firstDuplicate S.empty inputIds
+
+    unknownId =
+      find (`M.notMember` nodesById) inputIds
+
+    disconnectedId =
+      find (`S.notMember` acceptedSet) inputIds
+
+    result
+      | Just dup <- duplicateId    = Left (DuplicateNodeId dup)
+      | Just bad <- unknownId      = Left (UnknownNodeId bad)
+      | Just bad <- disconnectedId = Left (DisconnectedClaim bad)
+      | otherwise                  = Right acceptedInGraphOrder
+
     firstDuplicate _    []     = Nothing
     firstDuplicate seen (x:xs)
       | x `S.member` seen = Just x
@@ -287,3 +279,22 @@ validateClaimedM graph inputIds = do
       in if S.null nextAccepted
            then acceptedSet
            else saturate nodesById wantedSet (acceptedSet <> nextAccepted)
+
+validateClaimedM :: Graph -> [NodeId] -> App (Either ValidationError [NodeId])
+validateClaimedM graph inputIds = do
+  let result = validateClaimed graph inputIds
+      acceptedInGraphOrder =
+        case result of
+          Left _       -> []
+          Right accepted -> accepted
+
+  logBlockWhenDebug Validation
+    [ "validation input = " ++ show inputIds
+    , "known node ids = " ++ show (nodeIds graph)
+    , "claimable from empty = " ++ show (claimableNow graph [])
+    , "validation result = " ++ show result
+    , "claimable after accepted = " ++ show (claimableNow graph acceptedInGraphOrder)
+    , "reachable after accepted = " ++ show (reachableIds graph acceptedInGraphOrder)
+    ]
+
+  pure result
