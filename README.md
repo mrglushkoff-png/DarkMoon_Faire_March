@@ -5,6 +5,7 @@ If you have some programming background, getting up to speed with Haskell is eas
 https://github.com/learnyouahaskell/learnyouahaskell.github.io
 
 https://learnyouahaskell.github.io/chapters.html
+
 Chapter 13 for logging via Writers.
 
 Reasonable hSpec/QuickCheck coverage.
