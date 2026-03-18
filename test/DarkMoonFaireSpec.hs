@@ -31,7 +31,7 @@ starHeavyCfg ticketCount =
           , valueMinorStar = 200
           , valueMajorStar = 300
           , valueArclightEnergy = 0
-          , valueRareCore = 0
+          , valueEpicCore = 0
           , valueLeftoverTicket = 0
           }
     , debugEnabled = False
@@ -96,7 +96,7 @@ spec = do
               , rewardMinorStars = 0
               , rewardMajorStars = 0
               , rewardArclightEnergy = 0
-              , rewardRareCores = 0
+              , rewardEpicCores = 0
               }
           score `shouldBe` 230
           leftoverTicketValue `shouldBe` 0
@@ -122,7 +122,7 @@ spec = do
               , rewardMinorStars = 0
               , rewardMajorStars = 0
               , rewardArclightEnergy = 0
-              , rewardRareCores = 0
+              , rewardEpicCores = 0
               }
           score `shouldBe` 150
           leftoverTicketValue `shouldBe` 0
@@ -138,7 +138,7 @@ spec = do
           (resultStars, _)   = runApp (starHeavyCfg 34900) (runSessionM dmfGraph [])
       case (resultDefault, resultStars) of
         ( SessionValid _ _ _ _ _ _ _ solutionDefault _ _
-          , SessionValid _ _ _ _ _ _ _ solutionStars _ _ ) -> do
+          , SessionValid _ _ _ _ _ _ _ solutionStars _ _ ) ->
               resultScore solutionStars `shouldNotBe` resultScore solutionDefault
         _ ->
           expectationFailure "Expected both sessions to be valid"

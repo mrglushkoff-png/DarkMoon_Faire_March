@@ -14,7 +14,7 @@ sampleReward =
     , rewardMinorStars = 1
     , rewardMajorStars = 0
     , rewardArclightEnergy = 500
-    , rewardRareCores = 1
+    , rewardEpicCores = 1
     }
 
 sampleResult :: SearchResult
@@ -79,7 +79,7 @@ spec = do
         , ""
         , "Claimed reward total:"
         , show sampleReward
-        , "  = 150*G 5000*EXP 1*Troop 500*AE 1*RC"
+        , "  = 150*G 5000*EXP 1*Troop 500*AE 1*EC"
         , ""
         , "Claimed reward score:"
         , "360.0"
@@ -106,7 +106,7 @@ spec = do
         , ""
         , "Best remaining reward:"
         , show sampleReward
-        , "  = 150*G 5000*EXP 1*Troop 500*AE 1*RC"
+        , "  = 150*G 5000*EXP 1*Troop 500*AE 1*EC"
         , ""
         , "Best remaining ticket cost:"
         , "4200"

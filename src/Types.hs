@@ -29,7 +29,7 @@ data Reward = Reward
   , rewardMinorStars     :: !Int
   , rewardMajorStars     :: !Int
   , rewardArclightEnergy :: !Int
-  , rewardRareCores      :: !Int
+  , rewardEpicCores      :: !Int
   } deriving (Eq, Show)
 
 zeroReward :: Reward
@@ -40,7 +40,7 @@ zeroReward =
     , rewardMinorStars     = 0
     , rewardMajorStars     = 0
     , rewardArclightEnergy = 0
-    , rewardRareCores      = 0
+    , rewardEpicCores      = 0
     }
 
 addReward :: Reward -> Reward -> Reward
@@ -51,7 +51,7 @@ addReward a b =
     , rewardMinorStars     = rewardMinorStars a     + rewardMinorStars b
     , rewardMajorStars     = rewardMajorStars a     + rewardMajorStars b
     , rewardArclightEnergy = rewardArclightEnergy a + rewardArclightEnergy b
-    , rewardRareCores      = rewardRareCores a      + rewardRareCores b
+    , rewardEpicCores      = rewardEpicCores a      + rewardEpicCores b
     }
 
 data Valuation = Valuation
@@ -59,7 +59,7 @@ data Valuation = Valuation
   , valueMinorStar      :: !Double
   , valueMajorStar      :: !Double
   , valueArclightEnergy :: !Double
-  , valueRareCore       :: !Double
+  , valueEpicCore       :: !Double
   , valueLeftoverTicket :: !Double
   } deriving (Eq, Show)
 
@@ -70,7 +70,7 @@ defaultValuation =
     , valueMinorStar      = 90
     , valueMajorStar      = 120
     , valueArclightEnergy = 100 / 500
-    , valueRareCore       = 250
+    , valueEpicCore       = 1500
     , valueLeftoverTicket = 0
     }
 
@@ -81,7 +81,7 @@ scoreReward v r =
   + fromIntegral (rewardMinorStars r)     * valueMinorStar v
   + fromIntegral (rewardMajorStars r)     * valueMajorStar v
   + fromIntegral (rewardArclightEnergy r) * valueArclightEnergy v
-  + fromIntegral (rewardRareCores r)      * valueRareCore v
+  + fromIntegral (rewardEpicCores r)      * valueEpicCore v
 
 scoreLeftoverTickets :: Valuation -> Int -> Double
 scoreLeftoverTickets v ticketsLeft =

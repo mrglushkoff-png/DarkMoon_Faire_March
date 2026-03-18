@@ -16,7 +16,7 @@ tinyValuation =
     , valueMinorStar = 90
     , valueMajorStar = 120
     , valueArclightEnergy = 0
-    , valueRareCore = 0
+    , valueEpicCore = 0
     , valueLeftoverTicket = 0
     }
 

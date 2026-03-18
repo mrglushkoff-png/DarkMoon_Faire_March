@@ -92,7 +92,7 @@ getValuation = do
       putStrLn "  1 Troop -> 90 G"
       putStrLn "  1 Leader -> 120 G"
       putStrLn "  500 AE claimed from nodes -> 100 G"
-      putStrLn "  1 Rare Core -> 250 G"
+      putStrLn "  1 Epic Core -> 1500 G"
       putStrLn "  500 leftover tickets at event end -> 0 G"
       pure defaultValuation
     else do
@@ -116,9 +116,9 @@ getValuation = do
         100
         parseDouble
 
-      rareGold <- promptWithDefault
-        "How much gold do you value 1 Rare Core at? (default 250): "
-        250
+      epicGold <- promptWithDefault
+        "How much gold do you value 1 Epic Core at? (default 1500): "
+        1500
         parseDouble
 
       leftoverGold <- promptWithDefault
@@ -132,7 +132,7 @@ getValuation = do
           , valueMinorStar      = troopGold
           , valueMajorStar      = leaderGold
           , valueArclightEnergy = aeGold / 500
-          , valueRareCore       = rareGold
+          , valueEpicCore       = epicGold
           , valueLeftoverTicket = leftoverGold / 500
           }
 

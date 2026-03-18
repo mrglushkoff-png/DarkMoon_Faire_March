@@ -121,7 +121,7 @@ renderRewardCompact r =
     , part "Troop"  (rewardMinorStars r)
     , part "Leader" (rewardMajorStars r)
     , part "AE"     (rewardArclightEnergy r)
-    , part "RC"     (rewardRareCores r)
+    , part "EC"     (rewardEpicCores r)
     ])
   where
     part _ 0 = ""
